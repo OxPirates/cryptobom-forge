@@ -1,6 +1,7 @@
 crypto:
   algorithms:
     3DES: TRIPLEDES
+    DES: TRIPLEDES
     AES:
     ARC4:
     BLAKE2B:
@@ -91,6 +92,8 @@ crypto:
     - sign
     - tag
     - verify
+    - other
+    - unknown
 
   key-lengths:
     - 128
@@ -106,20 +109,24 @@ crypto:
     - OAEP
     - PKCS1V15
     - PKCS7
+    - PKCS5
+    - RAW
+    - OTHER
+    - UNKNOWN
 
   primitive-mappings:
     chacha20poly1305: ae
     rsa: pke
-    aes: blockcipher
-    aes128: blockcipher
-    aes256: blockcipher
-    idea: blockcipher
-    camellia: blockcipher
-    sm4: blockcipher
-    cast5: blockcipher
-    tripledes: blockcipher
-    chacha20: streamcipher
-    arc4: streamcipher
+    aes: block-cipher
+    aes128: block-cipher
+    aes256: block-cipher
+    idea: block-cipher
+    camellia: block-cipher
+    sm4: block-cipher
+    cast5: block-cipher
+    tripledes: block-cipher
+    chacha20: stream-cipher
+    arc4: stream-cipher
     shake128: xof
     kbkdfhmac: mac
     hkdfexpand: kdf
@@ -129,7 +136,7 @@ crypto:
     pbkdf2hmac: kdf
     concatkdfhmac: kdf
     concatkdfhash: kdf
-    diffiehellman: keyagree
+    diffiehellman: key-agree
     sha3256: hash
     sm3: hash
     shake256: hash # TODO - identify this as SHA-3? - MC

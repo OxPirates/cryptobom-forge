@@ -1,12 +1,15 @@
 import json
 import pathlib
 import re
+import traceback
 
 import click
 from click import Path
+from cyclonedx.builder.this import this_component as cdx_lib_component
+from cyclonedx.factory.license import LicenseFactory
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType
-from cyclonedx.output.json import JsonV1Dot4CbomV1Dot0
+from cyclonedx.output.json import JsonV1Dot6
 
 from cbom import __version__
 from cbom.cryptocheck import cryptocheck
@@ -55,7 +58,19 @@ def cryptobom():
 def generate(path, application_name, enable_cryptocheck, exclusion_pattern, output_file, rules_file, cryptocheck_output_file):
     """Generate a CBOM from CodeQL SARIF output."""
     cbom = Bom()
-    cbom.metadata.component = Component(name=application_name, type=ComponentType.APPLICATION)
+    lc_factory = LicenseFactory()
+    cbom.metadata.tools.components.add(cdx_lib_component())
+    cbom.metadata.tools.components.add(Component(
+        name='gs-product-cbom-generator',
+        type=ComponentType.APPLICATION,
+    ))
+
+    cbom.metadata.component = root_component = Component(
+        name=application_name,
+        type=ComponentType.APPLICATION,
+        licenses=[lc_factory.make_from_string('MIT')],
+        bom_ref='myApp',
+    )
 
     if exclusion_pattern:
         exclusion_pattern = re.compile(exclusion_pattern)
@@ -69,9 +84,26 @@ def generate(path, application_name, enable_cryptocheck, exclusion_pattern, outp
     if enable_cryptocheck:
         cryptocheck_output = cryptocheck.validate_cbom(cbom, rules_file)
         with open(cryptocheck_output_file, 'w') as file:
-            click.echo(message=json.dumps(cryptocheck_output, indent=4, sort_keys=True), file=file)
+            click.echo(message=json.dumps(cryptocheck_output,
+                       indent=4, sort_keys=True), file=file)
 
-    cbom = json.loads(JsonV1Dot4CbomV1Dot0(cbom).output_as_string(bom_format='CBOM'))
+    #print(json.dumps(cbom, indent=4, sort_keys=True))
+ 
+    '''for component in cbom.components:
+        if component.type == ComponentType.CRYPTOGRAPHIC_ASSET:
+            click.echo(f"bom-ref: {component.bom_ref}")
+            click.echo(f"Component: {component.name}")
+            click.echo(f"  Type: {component.type}")
+            click.echo(f"  name: {component.name}")
+            click.echo(f"  Crypto Properties:")
+            click.echo(f"    Asset Type: {component.crypto_properties.asset_type}")
+            click.echo(f"    Algorithm Properties: {component.crypto_properties.algorithm_properties}")
+            click.echo(f"    Certificate Properties: {component.crypto_properties.certificate_properties}")
+            click.echo(f"    Related Crypto Material Properties: {component.crypto_properties.related_crypto_material_properties}")
+            #click.echo(f"    Evidence: {component.evidence.occurrences[0]}")
+            #click.echo(f"    Evidence: {component.evidence.occurrences[0].additional_context}")'''
+
+    cbom = json.loads(JsonV1Dot6(cbom).output_as_string())
     if output_file:
         with open(output_file, 'w') as file:
             click.echo(message=json.dumps(cbom, indent=4), file=file)
@@ -83,7 +115,9 @@ def start():
     try:
         cryptobom()
     except Exception as e:
-        click.secho(str(e), fg='red')
+        click.secho(f"Error: {str(e)}", fg='red')
+        click.secho("\nTraceback:", fg='red')
+        click.secho(traceback.format_exc(), fg='red')
 
 
 def _process_file(cbom, query_file, exclusion_pattern=None):
@@ -91,11 +125,15 @@ def _process_file(cbom, query_file, exclusion_pattern=None):
         query_output = json.load(query_output)['runs'][0]
 
         driver = query_output['tool']['driver']
-        cbom.metadata.tools.add(Tool(
-            vendor=driver['organization'],
+        tool = Component(
+            type=ComponentType.LIBRARY,
+            # vendor=driver['organization'],
             name=driver['name'],
-            version=driver.get('version', driver.get('semanticVersion'))  # fixme: sarif misaligned
-        ))
+            version=driver.get('version', driver.get(
+                'semanticVersion'))  # fixme: sarif misaligned
+        )
+        # ToolRepository uses add() method
+        cbom.metadata.tools.components.add(tool)
 
         for result in query_output['results']:
             result = result['locations'][0]['physicalLocation']

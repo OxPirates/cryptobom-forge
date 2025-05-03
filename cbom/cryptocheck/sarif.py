@@ -22,8 +22,10 @@ def build_cryptocheck_sarif(cbom, rules, rule_violations, *, aggressive_aggregat
     for violation in rule_violations:
         violation_context = violation['detection']
         if aggressive_aggregation:
-            affected_components = (_get_bom_component(cbom, bom_ref).crypto_properties.detection_context for bom_ref in violation['bom-refs'])
-            detection_contexts = list(itertools.chain.from_iterable(affected_components))
+            affected_components = (_get_bom_component(
+                cbom, bom_ref).crypto_properties.detection_context for bom_ref in violation['bom-refs'])
+            detection_contexts = list(
+                itertools.chain.from_iterable(affected_components))
 
             sarif['runs'][0]['results'].append({
                 'ruleId': violation['name'],
@@ -62,8 +64,10 @@ def _add_rules_to_sarif(sarif, rules):
             'properties': {
                 'category': 'function',
                 'tags': ['cryptography'],
-                'problem.severity': rule['detection']['type'],  # todo: handle default
-                'security-severity': str(rule['detection']['severity'])  # todo: handle default
+                # todo: handle default
+                'problem.severity': rule['detection']['type'],
+                # todo: handle default
+                'security-severity': str(rule['detection']['severity'])
             }
         })
 

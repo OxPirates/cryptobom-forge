@@ -12,8 +12,10 @@ def test_generate_cbom__should_generate_full_cbom(cbom_expected_full):
     path = Path(__file__).parent / 'data' / 'codeql' / 'full.sarif'
 
     response = CliRunner().invoke(cli.cryptobom, ['generate', str(path)])
+    print("Output:", response.output, str(path))  # Prints the command output
+    print("Exit Code:", response.exit_code)  
     cbom = json.loads(response.output)
-
+   
     assert len(cbom['components']) == len(cbom_expected_full['components'])
 
 
@@ -29,7 +31,8 @@ def test_generate_cbom__should_handle_directory(cbom_expected_full):
 def test_generate_cbom__should_generate_root_component():
     path = Path(__file__).parent / 'data' / 'codeql' / 'full.sarif'
 
-    response = CliRunner().invoke(cli.cryptobom, ['generate', str(path), '-n', 'core-reactor'])
+    response = CliRunner().invoke(
+        cli.cryptobom, ['generate', str(path), '-n', 'core-reactor'])
     cbom = json.loads(response.output)
 
     assert cbom['metadata']['component']
@@ -38,7 +41,8 @@ def test_generate_cbom__should_generate_root_component():
 def test_generate_cbom__should_set_root_component_name():
     path = Path(__file__).parent / 'data' / 'codeql' / 'full.sarif'
 
-    response = CliRunner().invoke(cli.cryptobom, ['generate', str(path), '-n', 'core-reactor'])
+    response = CliRunner().invoke(
+        cli.cryptobom, ['generate', str(path), '-n', 'core-reactor'])
     cbom = json.loads(response.output)
 
     assert cbom['metadata']['component']['name'] == 'core-reactor'
@@ -47,19 +51,25 @@ def test_generate_cbom__should_set_root_component_name():
 def test_generate_cbom__should_exclude_finding_when_exclusion_pattern_match(cbom_expected_exclusion_pattern):
     path = Path(__file__).parent / 'data' / 'codeql' / 'full.sarif'
 
-    response = CliRunner().invoke(cli.cryptobom, ['generate', str(path), '-e', '(.*/)?test(s)?.*'])
+    response = CliRunner().invoke(
+        cli.cryptobom, ['generate', str(path), '-e', '(.*/)?test(s)?.*'])
     cbom = json.loads(response.output)
 
-    assert len(cbom['components']) == len(cbom_expected_exclusion_pattern['components'])
+    assert len(cbom['components']) == len(
+        cbom_expected_exclusion_pattern['components'])
 
 
 def test_generate_cbom__should_write_to_file(cbom_expected_full):
     path = Path(__file__).parent / 'data' / 'codeql' / 'full.sarif'
 
-    output_file = tempfile.NamedTemporaryFile()
-    CliRunner().invoke(cli.cryptobom, ['generate', str(path), '--output-file', output_file.name])
+    # Create a temporary file with delete=False
+    with tempfile.NamedTemporaryFile(delete=False) as output_file:
+        output_file_path = output_file.name
 
-    with open(output_file.name, 'r') as tmp:
+    CliRunner().invoke(cli.cryptobom, ['generate', str(
+        path), '--output-file', output_file_path])
+    print(output_file_path)
+    with open(output_file_path, 'r') as tmp:
         cbom = json.load(tmp)
         assert len(cbom['components']) == len(cbom_expected_full['components'])
 

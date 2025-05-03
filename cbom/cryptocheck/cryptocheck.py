@@ -9,8 +9,11 @@ from pathlib import Path
 import jsonschema
 import yaml
 from cyclonedx.model import XsUri
-from cyclonedx.model.vulnerability import BomTarget, Vulnerability, VulnerabilityAdvisory, VulnerabilityRating, \
-    VulnerabilitySeverity, VulnerabilitySource
+from cyclonedx.model.vulnerability import (BomTarget, Vulnerability,
+                                           VulnerabilityAdvisory,
+                                           VulnerabilityRating,
+                                           VulnerabilitySeverity,
+                                           VulnerabilitySource)
 
 from cbom.cryptocheck import sarif, validators
 
@@ -39,7 +42,8 @@ def validate_cbom(cbom, rules_file=None, *, enrich_cbom=True):
     rule_violations = []
     for rule in rules:
         non_compliant_components = []
-        algorithm_components = (c for c in cbom.components if c.type == 'crypto-asset' and c.crypto_properties.asset_type == 'algorithm')
+        algorithm_components = (c for c in cbom.components if c.type ==
+                                'crypto-asset' and c.crypto_properties.asset_type == 'algorithm')
 
         for algorithm_component in algorithm_components:
             algorithm_properties = algorithm_component.crypto_properties.algorithm_properties
@@ -51,7 +55,8 @@ def validate_cbom(cbom, rules_file=None, *, enrich_cbom=True):
                 'padding': algorithm_properties.padding
             }
 
-            is_match = map(lambda pattern: _VALIDATORS[pattern[1]](pattern[2], variant[pattern[0]]), rule['patterns'])
+            is_match = map(lambda pattern: _VALIDATORS[pattern[1]](
+                pattern[2], variant[pattern[0]]), rule['patterns'])
             if all(is_match):
                 non_compliant_components.append(algorithm_component.bom_ref)
 
@@ -69,7 +74,8 @@ def validate_cbom(cbom, rules_file=None, *, enrich_cbom=True):
 
 def _load_rules(file_path=None):
     if not file_path:
-        file_path = Path(__file__).absolute().parent.parent / 'resources/cryptocheck_rules.yml'
+        file_path = Path(__file__).absolute().parent.parent / \
+            'resources/cryptocheck_rules.yml'
 
     with (
         open(file_path) as rules,
@@ -78,20 +84,23 @@ def _load_rules(file_path=None):
         rules = yaml.safe_load(rules)
         jsonschema.validate(rules, json.load(schema))
         for rule in rules:
-            rule['patterns'] = [ast.literal_eval(pattern) for pattern in rule['patterns']]
+            rule['patterns'] = [ast.literal_eval(
+                pattern) for pattern in rule['patterns']]
     return rules
 
 
 def _add_vulnerabilities_to_cbom(cbom, rule_violations):
     for violation in rule_violations:
-        affected_components = [BomTarget(ref=bom_ref.value) for bom_ref in violation['bom-refs']]
+        affected_components = [BomTarget(ref=bom_ref.value)
+                               for bom_ref in violation['bom-refs']]
         rating = VulnerabilityRating(
             source=VulnerabilitySource(
                 url=XsUri('To follow'),  # todo
                 name='cryptocheck from SAN, MS, GH'  # todo
             ),
             score=Decimal(violation['detection']['severity']),
-            severity=_get_severity_from_score(violation['detection']['severity'])
+            severity=_get_severity_from_score(
+                violation['detection']['severity'])
         )
 
         cbom.vulnerabilities.add(Vulnerability(

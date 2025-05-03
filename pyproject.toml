@@ -1,5 +1,5 @@
 [build-system]
-requires = ['setuptools >= 61.0']
+requires = ['setuptools >= 77.0.0']
 build-backend = 'setuptools.build_meta'
 
 [project]
@@ -9,7 +9,7 @@ name = 'cryptobom-forge'
 description = 'Generate a cryptographic bill of materials from CodeQL output!'
 dependencies = [
     'click >= 8.0.0',
-    'cyclonedx-python-lib @ git+ssh://git@github.com/pre-quantum-research/cyclonedx-python-lib.git@cbom#egg=cyclonedx-python-lib',
+    'cyclonedx-python-lib @ git+https://git@github.com/OxPirates/cyclonedx-python-lib.git@main#egg=cyclonedx-python-lib',
     'jsonschema >= 2.0.0',
     'pyyaml >= 3.10',
     'requests >= 2.3.0'
@@ -21,11 +21,12 @@ authors = [
     {name = "Mark Carney", email="mark@quantumvillage.org"}
 ]
 readme = "README.md"
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = ["LICENSE"]
 
 keywords = ['cbom', 'codeql', 'cryptocheck', 'cryptography', 'pqc']
 classifiers = [
-    'Development Status :: 3 - Beta',
+    'Development Status :: 5 - Beta',
     'Environment :: Console',
     'Natural Language :: English',
     'Programming Language :: Python :: 3.10',
@@ -42,8 +43,10 @@ Repository = "https://github.com/santandersecurityresearch/cryptobom-forge.git"
 Issues = "https://github.com/santandersecurityresearch/cryptobom-forge/issues"
 Changelog = "https://github.com/santandersecurityresearch/cryptobom-forge/blob/main/CHANGELOG.rst"
 
-[tool.setuptools.packages]
-find = {}
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["cbom*"]
+exclude = ["tests*"]
 
 [tool.setuptools.dynamic]
 version = {attr = 'cbom.__version__'}
