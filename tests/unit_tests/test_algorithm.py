@@ -14,7 +14,7 @@ def test_algorithm_detection(cbom, aes):
     assert result in cbom.components
     assert result.crypto_properties.algorithm_properties.primitive == CryptoPrimitive.BLOCK_CIPHER
     assert result.crypto_properties.algorithm_properties.mode == CryptoMode.ECB
-    assert result.name == "AES-32-ECB-PKCS7"
+    assert result.name == "AES-128-ECB-PKCS7"
     assert len(cbom.components) == 1
 
 def test_algorithm_name_generation(cbom, rsa):

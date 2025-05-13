@@ -11,10 +11,14 @@ from cbom import lib_utils
 
 _ALGORITHM_REGEX = re.compile(
     f"{'|'.join(lib_utils.get_algorithms())}", flags=re.IGNORECASE)
-_KEY_LENGTH_REGEX = re.compile(
+key_lengths = [str(k) for k in lib_utils.get_key_lengths()]
+pattern = r"(?<!\d)(" + "|".join(key_lengths) + r")(?!\d)"
+_KEY_LENGTH_REGEX = _KEY_LENGTH_REGEX = re.compile(pattern)
+
+'''_KEY_LENGTH_REGEX = re.compile(
     r'(?:key_?size\s*=\s*(\d+)|generate_private_key\([^)]*key_?size\s*=\s*(\d+)|generate\((\d+)|urandom\((\d+)|[\-_](\d+)(?:\)|[\-_]|$))',
     flags=re.IGNORECASE
-)
+)'''
 
 
 def get_algorithm(code_snippet):
@@ -54,12 +58,16 @@ def get_detection_context(physical_location):
         #return ComponentEvidence(identity=identity)
 
 
-def get_key_size(code_snippet):
+'''def get_key_size(code_snippet):
     match = _KEY_LENGTH_REGEX.search(code_snippet)
     if match:
         # Return first non-None group - handles all capture groups
         return next((g for g in match.groups() if g is not None), None)
-    return None
+    return None'''
+def get_key_size(code_snippet):
+    match = _KEY_LENGTH_REGEX.search(code_snippet)
+    if match:
+        return _KEY_LENGTH_REGEX.sub('\\1', match.group())
 
 def string_to_integer_array_set(s):
     # Split the string on whitespace
