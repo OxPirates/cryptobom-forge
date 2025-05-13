@@ -19,7 +19,7 @@ def test_algorithm_detection(cbom, aes):
 
 def test_algorithm_name_generation(cbom, rsa):
     parse_algorithm(cbom, rsa, "RSA key generation detected")
-    assert cbom.components[0].name == "SHA256-OAEP"
+    assert cbom.components[0].name == "RSA-2048-OAEP"
 
 def test_algorithm__should_infer_primitive(cbom, aes):
     # Act
