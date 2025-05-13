@@ -1,14 +1,15 @@
 import copy
 import json
-from pathlib import Path
-
 import pytest
+from pathlib import Path
+from unittest.mock import patch
 from cyclonedx.model.bom import Bom
 from cyclonedx.model.component import Component, ComponentType
 
 
 @pytest.fixture
 def cbom():
+    """Generate a sample CBOM for testing - replaces create_sample_cbom"""
     cbom = Bom()
 
     root_component = Component(
@@ -91,3 +92,20 @@ def make_rsa_component(rsa):
         return data
 
     return _make_component
+
+
+@pytest.fixture(autouse=True)
+def setup_patches():
+    """Setup mock patches for certificate and private key components"""
+    with patch('cbom.parser.algorithm.certificate.parse_x509_certificate_details') as cert_mock, \
+         patch('cbom.parser.algorithm.related_crypto_material.parse_private_key') as key_mock:
+        
+        cert_mock.return_value = Component(
+            name='certificate-component', 
+            type=ComponentType.CRYPTOGRAPHIC_ASSET
+        )
+        key_mock.return_value = Component(
+            name='private-key-component', 
+            type=ComponentType.CRYPTOGRAPHIC_ASSET
+        )
+        yield

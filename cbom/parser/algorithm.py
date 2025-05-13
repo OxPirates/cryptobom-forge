@@ -17,8 +17,8 @@ _PADDING_REGEX = re.compile(
     f"{'|'.join(lib_utils.get_padding_schemes())}", flags=re.IGNORECASE)
 
 
-def parse_algorithm(cbom, finding):
-    crypto_properties = _generate_crypto_component(finding)
+def parse_algorithm(cbom, finding,message):
+    crypto_properties = _generate_crypto_component(finding,message)
     if (padding := crypto_properties.algorithm_properties.padding) not in [CryptoPadding.OTHER, CryptoPadding.UNKNOWN]:
         name = f'{crypto_properties.algorithm_properties.parameter_set_identifier}-{padding.value.upper()}'
     else:
@@ -45,6 +45,8 @@ def parse_algorithm(cbom, finding):
         if 'key' in code_snippet.lower():
             private_key_component = related_crypto_material.parse_private_key(
                 cbom, finding)
+            #print(private_key_component)
+            #print(algorithm_component)
             cbom.register_dependency(algorithm_component, depends_on=[
                                      private_key_component]) #algorithm_component
 
@@ -55,11 +57,16 @@ def parse_algorithm(cbom, finding):
                                      certificate_component]) #
 
 
-def _generate_crypto_component(finding):
+def _generate_crypto_component(finding,message):
     code_snippet = finding['contextRegion']['snippet']['text']
-    algorithm = utils.get_algorithm(
+    algorithm = utils.get_algorithm(message)
+   
+    '''print(algorithm)
+    print(code_snippet)
+    print(finding['region'])'''
+    if algorithm == 'unknown':
+        algorithm =  algorithm = utils.get_algorithm(
         utils.extract_precise_snippet(code_snippet, finding['region']))
-
     if algorithm == 'unknown':
         algorithm = utils.get_algorithm(code_snippet)
 
@@ -145,13 +152,15 @@ def _is_existing_component_overlap(cbom, component):
 
 
 def _update_existing_component(existing_component, component):
-    '''new_context = component.crypto_properties.detection_context[0]
+    new_context = component.evidence.occurrences[0] # crypto_properties.detection_context[0]
 
     if existing_context := utils.is_existing_detection_context_match(existing_component, new_context):
         existing_context.additional_context = utils.merge_code_snippets(existing_context, new_context)
-        existing_context.line_numbers = existing_context.line_numbers.union(new_context.line_numbers)
+        existing_context.line = utils.union_to_string(utils.string_to_integer_array_set(existing_context.line).union(
+            utils.string_to_integer_array_set(new_context.line)))
+        #existing_context.line_numbers = existing_context.line_numbers.union(new_context.line_numbers)
         return existing_component
     else:
         existing_component.crypto_properties.algorithm_properties.crypto_functions.update(component.crypto_properties.algorithm_properties.crypto_functions)
-        existing_component.crypto_properties.detection_context.add(new_context)
-        return existing_component'''
+        existing_component.evidence.occurrences.add(new_context)
+        return existing_component

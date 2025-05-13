@@ -16,7 +16,7 @@ def parse_initialization_vector(cbom, finding):
     component = Component(
         bom_ref=f'cryptography:iv:{unique_identifier}',
         name=str(unique_identifier),
-        type=ComponentType.CRYPTO_ASSET,
+        type=ComponentType.CRYPTOGRAPHIC_ASSET,
         crypto_properties=crypto_properties
     )
     cbom.components.add(component)
@@ -24,7 +24,9 @@ def parse_initialization_vector(cbom, finding):
 
 
 def parse_private_key(cbom, finding):
+    print(finding['contextRegion']['snippet']['text']  )
     key_size = utils.get_key_size(finding['contextRegion']['snippet']['text'])
+    print(key_size)
     if key_size:
         key_size = int(key_size)
 
@@ -58,28 +60,8 @@ def _generate_crypto_component(component, material_type, *, size=None):
 
 
 def _is_existing_component_overlap(cbom, component):
-    related_crypto_material_components = (
-        c for c in cbom.components if c.crypto_properties.asset_type == CryptoAssetType.RELATED_CRYPTO_MATERIAL)
-
-    if component.evidence:
-        for existing_component in related_crypto_material_components:
-            if utils.is_existing_detection_context_match(existing_component, component.evidence.occurrences[0]):
-                return existing_component
+    return utils.is_existing_component_overlap(cbom, component, CryptoAssetType.RELATED_CRYPTO_MATERIAL)
 
 
 def _update_existing_component(existing_component, component):
-    context = component.crypto_properties.detection_context[0]
-
-    if existing_context := utils.is_existing_detection_context_match(existing_component, context):
-        existing_context.additional_context = utils.merge_code_snippets(
-            existing_context, context)
-        existing_context.line_numbers = existing_context.line_numbers.union(
-            context.line_numbers)
-
-        for field in vars(component.crypto_properties.related_crypto_material_properties):
-            if not getattr(existing_component.crypto_properties.related_crypto_material_properties, field):
-                field_value = getattr(
-                    component.crypto_properties.related_crypto_material_properties, field)
-                setattr(
-                    existing_component.crypto_properties.related_crypto_material_properties, field, field_value)
-        return existing_component
+    return utils.update_existing_component(existing_component, component, 'related_crypto_material_properties')

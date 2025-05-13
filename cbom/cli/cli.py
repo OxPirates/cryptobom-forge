@@ -10,6 +10,13 @@ from cyclonedx.factory.license import LicenseFactory
 from cyclonedx.model.bom import Bom, Tool
 from cyclonedx.model.component import Component, ComponentType
 from cyclonedx.output.json import JsonV1Dot6
+from cyclonedx.output.xml import XmlV1Dot6
+from cyclonedx.output.json import Json as JsonOutputter
+from cyclonedx.output.xml import Xml as XmlOutputter
+from cyclonedx.validation.xml import XmlValidator
+from cyclonedx.output import make_outputter
+from cyclonedx.schema import OutputFormat, SchemaVersion
+
 
 from cbom import __version__
 from cbom.cryptocheck import cryptocheck
@@ -104,11 +111,14 @@ def generate(path, application_name, enable_cryptocheck, exclusion_pattern, outp
             #click.echo(f"    Evidence: {component.evidence.occurrences[0].additional_context}")'''
 
     cbom = json.loads(JsonV1Dot6(cbom).output_as_string())
+    #my_xml_outputter: 'XmlOutputter' = make_outputter(cbom, OutputFormat.XML, SchemaVersion.V1_6)
+    #serialized_xml = my_xml_outputter.output_as_string(indent=2)
     if output_file:
         with open(output_file, 'w') as file:
             click.echo(message=json.dumps(cbom, indent=4), file=file)
     else:
         click.echo(message=json.dumps(cbom, indent=4))
+        #click.echo(serialized_xml)
 
 
 def start():
@@ -136,9 +146,10 @@ def _process_file(cbom, query_file, exclusion_pattern=None):
         cbom.metadata.tools.components.add(tool)
 
         for result in query_output['results']:
-            result = result['locations'][0]['physicalLocation']
+            message = result['message']['text']
+            result = result['locations'][0]['physicalLocation']            
             if not exclusion_pattern or not exclusion_pattern.fullmatch(result['artifactLocation']['uri']):
-                algorithm.parse_algorithm(cbom, result)
+                algorithm.parse_algorithm(cbom, result,message)
 
 
 if __name__ == '__main__':
