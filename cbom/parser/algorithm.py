@@ -23,13 +23,16 @@ def parse_algorithm(cbom, finding,message):
         name = f'{crypto_properties.algorithm_properties.parameter_set_identifier}-{padding.value.upper()}'
     else:
         name = crypto_properties.algorithm_properties.parameter_set_identifier
-
+    crypto_properties.oid=utils.get_oid_from_name(name)
+    security_level = utils.get_security_levels(name)
+    crypto_properties.algorithm_properties.classical_security_level = security_level.get('classical')
+    crypto_properties.algorithm_properties.nist_quantum_security_level = security_level.get('nist_qsl')
     algorithm_component = Component(
         bom_ref=f'cryptography:{CryptoAssetType.ALGORITHM}:{uuid.uuid4()}',
         name=name,
         type=ComponentType.CRYPTOGRAPHIC_ASSET,
         crypto_properties=crypto_properties,
-        evidence=utils.get_detection_context(finding)
+        evidence=utils.get_detection_context(finding),
     )
 
     if not (existing_component := _is_existing_component_overlap(cbom, algorithm_component)):

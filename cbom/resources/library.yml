@@ -1,7 +1,6 @@
 crypto:
   algorithms:
     3DES: TRIPLEDES
-    DES: TRIPLEDES
     AES:
     ARC4:
     BLAKE2B:
@@ -16,6 +15,7 @@ crypto:
     CONCATKDFHASH:
     CONCATKDFHMAC:
     DES3: TRIPLEDES
+    DES: TRIPLEDES
     DESEDE: TRIPLEDES
     DIFFIEHELLMAN:
     DH: DIFFIEHELLMAN
@@ -31,6 +31,8 @@ crypto:
     MD5:
     PBKDF2HMAC:
     PSS:
+    RC2:
+    RIJNDAEL:
     RSA:
     SCRYPT:
     SECP192R1:
@@ -118,6 +120,8 @@ crypto:
     chacha20poly1305: ae
     rsa: pke
     aes: block-cipher
+    RC2: block-cipher
+    RIJNDAEL: block-cipher
     aes128: block-cipher
     aes256: block-cipher
     idea: block-cipher

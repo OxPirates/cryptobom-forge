@@ -29,3 +29,5 @@ rpds-py==0.13.1
 sortedcontainers==2.4.0
 tox==4.11.4
 urllib3==2.2.2
+cryptography>=42.0.0
+asn1crypto>=1.5.1

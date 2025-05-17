@@ -24,9 +24,9 @@ def parse_initialization_vector(cbom, finding):
 
 
 def parse_private_key(cbom, finding):
-    print(finding['contextRegion']['snippet']['text']  )
+    #print(finding['contextRegion']['snippet']['text']  )
     key_size = utils.get_key_size(finding['contextRegion']['snippet']['text'])
-    print(key_size)
+    #print(key_size)
     if key_size:
         key_size = int(key_size)
 
