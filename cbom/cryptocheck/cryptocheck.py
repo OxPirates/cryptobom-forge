@@ -43,11 +43,11 @@ def validate_cbom(cbom, rules_file=None, *, enrich_cbom=True):
     for rule in rules:
         non_compliant_components = []
         algorithm_components = (c for c in cbom.components if c.type ==
-                                'crypto-asset' and c.crypto_properties.asset_type == 'algorithm')
+                                'cryptographic-asset' and c.crypto_properties.asset_type == 'algorithm')
 
         for algorithm_component in algorithm_components:
             algorithm_properties = algorithm_component.crypto_properties.algorithm_properties
-            variant = algorithm_properties.variant.split('-')
+            variant = algorithm_properties.parameter_set_identifier.split('-')
             variant = {
                 'algo': variant[0],
                 'keylen': int(variant[1]) if len(variant) > 1 and variant[1].isnumeric() else None,

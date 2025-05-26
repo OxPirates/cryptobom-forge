@@ -23,7 +23,7 @@ def build_cryptocheck_sarif(cbom, rules, rule_violations, *, aggressive_aggregat
         violation_context = violation['detection']
         if aggressive_aggregation:
             affected_components = (_get_bom_component(
-                cbom, bom_ref).crypto_properties.detection_context for bom_ref in violation['bom-refs'])
+                cbom, bom_ref).evidence.occurrences for bom_ref in violation['bom-refs'])
             detection_contexts = list(
                 itertools.chain.from_iterable(affected_components))
 
@@ -39,7 +39,7 @@ def build_cryptocheck_sarif(cbom, rules, rule_violations, *, aggressive_aggregat
         else:
             for bom_ref in violation['bom-refs']:
                 affected_component = _get_bom_component(cbom, bom_ref)
-                for detection_context in affected_component.crypto_properties.detection_context:
+                for detection_context in affected_component.evidence.occurrences:
                     sarif['runs'][0]['results'].append({
                         'ruleId': violation['name'],
                         'ruleIndex': 0,
@@ -73,16 +73,17 @@ def _add_rules_to_sarif(sarif, rules):
 
 
 def _build_location_object(detection_context):
+    line_numbers = detection_context.line.split(' ')
     return {
         'physicalLocation': {
             'artifactLocation': {
-                'uri': detection_context.file_path,
+                'uri': detection_context.location,
                 'index': 0,
                 'uriBaseId': '%SRCROOT%'
             },
             'region': {
-                'startLine': detection_context.line_numbers[0],
-                'endLine': detection_context.line_numbers[-1]
+                'startLine': line_numbers[0],
+                'endLine': line_numbers[-1]
             }
         }
     }
