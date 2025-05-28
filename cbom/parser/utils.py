@@ -280,7 +280,7 @@ def get_detection_context(physical_location):
         code_snippet = context_region.get('snippet').get('text')
 
         occurance = [Occurrence(
-            location=file_path, line=lines, additional_context=code_snippet)]
+            location=file_path, line=int(lines.split()[0]), additional_context=code_snippet)]
         method = [Method(technique=AnalysisTechnique.OTHER,
                          confidence=0.8, value="other")]
         # occurance = [Occurrence(field=IdentityField.Name, confidence=0.8, concludedValue="sammple")]
