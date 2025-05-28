@@ -9,7 +9,7 @@ from asn1crypto.core import ObjectIdentifier
 from cyclonedx.model import Copyright
 from cyclonedx.model.component_evidence import (AnalysisTechnique, CallStack,
                                        ComponentEvidence, Identity,
-                                       IdentityFieldType, Method, Occurrence,
+                                       IdentityField, Method, Occurrence,
                                        StackFrame)
 
 from cbom import lib_utils
@@ -283,8 +283,8 @@ def get_detection_context(physical_location):
             location=file_path, line=lines, additional_context=code_snippet)]
         method = [Method(technique=AnalysisTechnique.OTHER,
                          confidence=0.8, value="other")]
-        # occurance = [Occurrence(field=IdentityFieldType.Name, confidence=0.8, concludedValue="sammple")]
-        identity = [Identity(field=IdentityFieldType.NAME, confidence=0.8,
+        # occurance = [Occurrence(field=IdentityField.Name, confidence=0.8, concludedValue="sammple")]
+        identity = [Identity(field=IdentityField.NAME, confidence=0.8,
                              concluded_value="sammple", methods=method, tools=["codeql"])]
         stackframe = [StackFrame(package="java", module="module", function="function", parameters=[
                                  "param1", "param2"], line=10, column=30, full_filename=file_path)]
