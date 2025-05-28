@@ -7,7 +7,7 @@ from asn1crypto.algos import DigestAlgorithmId
 from asn1crypto.core import ObjectIdentifier
 
 from cyclonedx.model import Copyright
-from cyclonedx.model.component import (AnalysisTechnique, CallStack,
+from cyclonedx.model.component_evidence import (AnalysisTechnique, CallStack,
                                        ComponentEvidence, Identity,
                                        IdentityFieldType, Method, Occurrence,
                                        StackFrame)
