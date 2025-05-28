@@ -332,15 +332,15 @@ def union_to_string(union_set):
 
 def is_existing_detection_context_match(component, new_context):
     for context in component.evidence.occurrences:
-        if context.location == new_context.location and string_to_integer_array_set(context.line).intersection(string_to_integer_array_set(new_context.line)):
+        if context.location == new_context.location and string_to_integer_array_set(str(context.line)).intersection(string_to_integer_array_set(str(new_context.line))):
             return context
 
 
 def merge_code_snippets(dc1, dc2):
-    first = (dc1 if min(string_to_integer_array(dc1.line)) < min(
-        string_to_integer_array(dc2.line)) else dc2).additional_context
-    second = (dc1 if max(string_to_integer_array(dc1.line)) > max(
-        string_to_integer_array(dc2.line)) else dc2).additional_context
+    first = (dc1 if min(string_to_integer_array(str(dc1.line))) < min(
+        string_to_integer_array(str(dc2.line))) else dc2).additional_context
+    second = (dc1 if max(string_to_integer_array(str(dc1.line))) > max(
+        string_to_integer_array(str(dc2.line))) else dc2).additional_context
 
     match = SequenceMatcher(None, first, second).find_longest_match()
     return f'{first[:match.a]}{second[:match.size]}{second[match.size:]}'
@@ -393,9 +393,9 @@ def update_existing_component(existing_component, component, properties_field=No
     if existing_context := is_existing_detection_context_match(existing_component, context):
         existing_context.additional_context = merge_code_snippets(
             existing_context, context)
-        existing_context.line = union_to_string(
-            string_to_integer_array_set(existing_context.line).union(
-                string_to_integer_array_set(context.line)))
+        existing_context.line = int(union_to_string(
+            string_to_integer_array_set(str(existing_context.line)).union(
+                string_to_integer_array_set(str(context.line)))).split()[0])
 
         if properties_field and hasattr(component.crypto_properties, properties_field):
             source_props = getattr(component.crypto_properties, properties_field)
