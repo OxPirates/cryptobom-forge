@@ -73,7 +73,7 @@ def _add_rules_to_sarif(sarif, rules):
 
 
 def _build_location_object(detection_context):
-    line_numbers = detection_context.line.split(' ')
+    line_numbers = str(detection_context.line).split(' ')
     return {
         'physicalLocation': {
             'artifactLocation': {
