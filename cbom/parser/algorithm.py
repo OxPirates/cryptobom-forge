@@ -159,8 +159,8 @@ def _update_existing_component(existing_component, component):
 
     if existing_context := utils.is_existing_detection_context_match(existing_component, new_context):
         existing_context.additional_context = utils.merge_code_snippets(existing_context, new_context)
-        existing_context.line = utils.union_to_string(utils.string_to_integer_array_set(str(existing_context.line)).union(
-            utils.string_to_integer_array_set(str(new_context.line))))
+        existing_context.line = int(utils.union_to_string(utils.string_to_integer_array_set(str(existing_context.line)).union(
+            utils.string_to_integer_array_set(str(new_context.line)))).split()[0])
         #existing_context.line_numbers = existing_context.line_numbers.union(new_context.line_numbers)
         return existing_component
     else:
